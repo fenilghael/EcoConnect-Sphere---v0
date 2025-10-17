@@ -368,3 +368,77 @@ For deployment issues:
 ---
 
 Remember to always test deployments in a staging environment before promoting to production!
+
+## 🐧 DigitalOcean Droplet (recommended for simple controlled deployments)
+
+This section explains how to provision a Droplet, configure SSH and firewall, and deploy the project using the included scripts `scripts/deploy.sh` (Linux) and `scripts/deploy.ps1` (PowerShell).
+
+Prerequisites
+- A DigitalOcean account and API token (optional if using the control panel)
+- `ssh` and `git` installed locally
+- An SSH key added to your DigitalOcean account
+- (Optional) `doctl` CLI installed: https://docs.digitalocean.com/reference/doctl/
+
+Create a Droplet (one-liner with `doctl`):
+
+```bash
+# replace <name> and <region> as needed
+doctl compute droplet create ecoconnect-1 --size s-1vcpu-1gb --image ubuntu-24-04-x64 --region nyc3 --ssh-keys <your-ssh-key-id> --wait
+```
+
+Or create a Droplet from the web UI and add your SSH key.
+
+Open required ports (simplest: allow HTTP/HTTPS and SSH)
+
+```bash
+# Example UFW rules on the droplet
+sudo ufw allow 22/tcp
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw enable
+```
+
+Environment variables
+- Copy `backend/env.example` to `backend/.env` and set values for production. Important variables:
+   - `MONGODB_URI` (use MongoDB Atlas or a managed MongoDB service)
+   - `JWT_SECRET`
+   - `FRONTEND_URL`
+
+Using the provided scripts
+
+- From your machine (macOS / Linux):
+
+```bash
+# Clone repo on your machine (optional) and run deploy script
+# If you want the droplet to git clone the repo directly, pass the repo URL
+./scripts/deploy.sh user@DROPLET_IP --repo https://github.com/your/repo.git --private-key /path/to/key
+```
+
+- From Windows PowerShell (pwsh)
+
+```powershell
+# Example: use your SSH user and droplet IP
+# pwsh.exe ./scripts/deploy.ps1 -Target user@DROPLET_IP -Repo https://github.com/your/repo.git -KeyPath C:\Users\you\.ssh\id_rsa
+```
+
+What the scripts do
+- Install Docker and the docker compose plugin on the droplet (Ubuntu/Debian based)
+- Clone the repository (if `--repo`/`-Repo` is provided)
+- Run `docker compose pull` and `docker compose up -d --build`
+
+Notes and troubleshooting
+- If you use MongoDB Atlas, ensure your droplet's public IP is allowed in the Atlas network access list (or set 0.0.0.0/0 for testing only).
+- If the deploy script fails at Docker install, SSH into the droplet and run the install steps manually. Check `/var/log/syslog` for system errors.
+- To view Docker compose logs on the droplet:
+
+```bash
+ssh user@DROPLET_IP 'sudo docker compose logs -f'
+```
+
+Cleaning up
+- Remove old images and dangling volumes with `sudo docker system prune -af` on the droplet.
+
+Security
+- Use a managed database where possible.
+- Use a secrets manager or environment variables via `docker compose` override files. Do not commit `.env`.
+
