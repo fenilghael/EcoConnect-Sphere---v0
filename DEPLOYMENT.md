@@ -442,3 +442,47 @@ Security
 - Use a managed database where possible.
 - Use a secrets manager or environment variables via `docker compose` override files. Do not commit `.env`.
 
+## Deploying with doctl (App Platform)
+
+Two helper files are included for App Platform automation:
+
+- `doctl-app.yaml` — an App Platform spec that defines the backend service and the static frontend build.
+- `scripts/doctl-deploy.ps1` — a PowerShell helper that creates DO secrets and calls `doctl apps create --spec ./doctl-app.yaml`.
+
+Prerequisites:
+- Install `doctl` and authenticate: `doctl auth init`
+- Have a MongoDB URI (Atlas) and a JWT secret ready
+
+Usage (PowerShell / pwsh):
+
+```powershell
+# Provide secrets on the command line (or the script will prompt)
+# pwsh.exe ./scripts/doctl-deploy.ps1 -MongoUri "<your-mongodb-uri>" -JwtSecret "<your-jwt-secret>"
+```
+
+What the helper does:
+- Creates/updates two App Platform secrets: `MONGODB_URI` and `JWT_SECRET`.
+- Submits the `doctl-app.yaml` spec to create an App Platform app that builds the frontend and deploys the backend Dockerfile.
+
+After running, track the app in the DO control panel or with `doctl apps list` and `doctl apps get <APP_ID>`.
+
+Security reminder: keep your secrets out of version control.
+
+### Installing `doctl` on Windows
+
+If you plan to use the App Platform automation, you'll need the `doctl` CLI installed locally. A helper script is included at `scripts/install-doctl.ps1` which will attempt to install `doctl` using `winget`, Chocolatey, or Scoop, and falls back to downloading the binary.
+
+Run in PowerShell (may require administrator privileges):
+
+```powershell
+pwsh.exe -NoProfile -ExecutionPolicy Bypass ./scripts/install-doctl.ps1
+```
+
+After installation, verify with:
+
+```powershell
+doctl version
+```
+
+If `doctl` still isn't recognized, restart your terminal or log out/in so the PATH changes take effect.
+

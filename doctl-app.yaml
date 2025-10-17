@@ -1,0 +1,48 @@
+name: ecoconnect-sphere
+services:
+  - name: backend
+    github:
+      repo: fenilghael/EcoConnect-Sphere---v0
+      branch: main
+    dockerfile_path: backend/Dockerfile
+    instance_size_slug: basic-xxs
+    instance_count: 1
+    http_port: 5000
+    routes:
+      - path: /api/*
+      - path: /uploads/*
+    envs:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: "5000"
+      - key: FRONTEND_URL
+        value: "https://your-frontend-domain.example"
+      - key: JWT_EXPIRE
+        value: "30d"
+      - key: JWT_COOKIE_EXPIRE
+        value: "30"
+      - key: RATE_LIMIT_WINDOW_MS
+        value: "900000"
+      - key: RATE_LIMIT_MAX_REQUESTS
+        value: "100"
+      - key: MONGODB_URI
+        value: ${MONGODB_URI}
+        type: secret
+      - key: JWT_SECRET
+        value: ${JWT_SECRET}
+        type: secret
+
+  - name: frontend
+    github:
+      repo: fenilghael/EcoConnect-Sphere---v0
+      branch: main
+    dockerfile_path: Dockerfile.frontend
+    instance_size_slug: basic-xxs
+    instance_count: 1
+    http_port: 80
+    routes:
+      - path: /
+    envs:
+      - key: VITE_API_URL
+        value: "https://your-backend-domain.example/api"
