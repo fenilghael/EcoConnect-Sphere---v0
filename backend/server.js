@@ -55,12 +55,19 @@ console.log('🔒 CORS allowed origins:', allowedOrigins);
 
 const corsOptions = {
   origin: function (origin, callback) {
+    // If ALLOW_ALL_CORS=true in env, allow everything (use only for debugging)
+    if (String(process.env.ALLOW_ALL_CORS).toLowerCase() === 'true') {
+      return callback(null, true);
+    }
+
     // allow requests with no origin (mobile apps, curl, server-to-server)
     if (!origin) return callback(null, true);
+
     if (allowedOrigins.indexOf(origin) === -1) {
       console.warn('CORS blocked request from origin:', origin);
       return callback(new Error('Not allowed by CORS'), false);
     }
+
     return callback(null, true);
   },
   credentials: true,
