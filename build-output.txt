@@ -1,0 +1,13 @@
+
+> ecoconnect-sphere@1.0.0 build
+> vite build
+
+[36mvite v6.3.5 [32mbuilding for production...[36m[39m
+transforming...
+[32mΓ£ô[39m 1713 modules transformed.
+rendering chunks...
+computing gzip size...
+[2mbuild/[22m[32mindex.html                 [39m[1m[2m  0.44 kB[22m[1m[22m[2m Γöé gzip:   0.29 kB[22m
+[2mbuild/[22m[35massets/index-D2z_Utby.css  [39m[1m[2m 54.99 kB[22m[1m[22m[2m Γöé gzip:   9.84 kB[22m
+[2mbuild/[22m[36massets/index-BruDlK2o.js   [39m[1m[2m396.12 kB[22m[1m[22m[2m Γöé gzip: 115.03 kB[22m
+[32mΓ£ô built in 2.19s[39m
