@@ -5,7 +5,7 @@ This repository contains a Vite frontend. The following instructions deploy only
 Build settings
 - Framework: Other (Vite)
 - Build command: npm ci && npm run build
-- Output directory: dist
+- Output directory: build
 
 Environment variable
 - VITE_API_URL: https://<your-backend-domain-or-app-url>/api
@@ -17,7 +17,7 @@ Using Vercel web UI
 4. Set Build Command to:
    npm ci && npm run build
 5. Set Output Directory to:
-   dist
+   build
 6. Add Environment Variable `VITE_API_URL` (Production)
 7. Deploy.
 
@@ -29,5 +29,5 @@ Using Vercel CLI
    vercel --prod --confirm --name ecoconnect-frontend --env VITE_API_URL="https://<your-backend>/api"
 
 Notes
-- The `vercel.json` file included sets the static-build to use the `dist` directory and routes all paths to `index.html` for SPA routing.
+- The `vercel.json` file included sets the static-build to use the `build` directory and routes all paths to `index.html` for SPA routing.
 - If you want to host both frontend and backend on Vercel, consider separating the backend or using serverless functions; currently backend is configured as a Node Express app and is better run on App Platform or a Droplet.
