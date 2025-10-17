@@ -36,17 +36,40 @@ const limiter = rateLimit({
 });
 app.use('/api/', limiter);
 
-// CORS configuration
+// CORS configuration - support multiple frontend URLs via FRONTEND_URLS env var (comma-separated)
+const defaultLocalOrigins = [
+  'http://localhost:5173',
+  'http://localhost:3000',
+  'http://localhost:4173'
+];
+
+const frontendUrlsEnv = process.env.FRONTEND_URLS || process.env.FRONTEND_URL || '';
+const configuredFrontendUrls = frontendUrlsEnv
+  .split(',')
+  .map(u => u.trim())
+  .filter(Boolean);
+
+const allowedOrigins = Array.from(new Set([...configuredFrontendUrls, ...defaultLocalOrigins]));
+
+console.log('🔒 CORS allowed origins:', allowedOrigins);
+
 const corsOptions = {
-  origin: [
-    process.env.FRONTEND_URL || 'http://localhost:5173',
-    'http://localhost:3000', // Add Vite dev server default port
-    'http://localhost:4173'  // Add Vite preview port
-  ],
+  origin: function (origin, callback) {
+    // allow requests with no origin (mobile apps, curl, server-to-server)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      console.warn('CORS blocked request from origin:', origin);
+      return callback(new Error('Not allowed by CORS'), false);
+    }
+    return callback(null, true);
+  },
   credentials: true,
   optionsSuccessStatus: 200
 };
+
 app.use(cors(corsOptions));
+// Ensure preflight OPTIONS requests are handled
+app.options('*', cors());
 
 // Body parsing middleware
 app.use(express.json({ limit: '10mb' }));
