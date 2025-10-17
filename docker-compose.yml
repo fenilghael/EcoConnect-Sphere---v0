@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # MongoDB (for local development)
+  mongodb:
+    image: mongo:7.0
+    container_name: ecoconnect-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: ecoconnect-sphere
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - ecoconnect-network
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ecoconnect-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      NODE_ENV: production
+      PORT: 5000
+      MONGODB_URI: mongodb://admin:password@mongodb:27017/ecoconnect-sphere?authSource=admin
+      JWT_SECRET: your-super-secret-jwt-key-here
+      JWT_EXPIRE: 30d
+      JWT_COOKIE_EXPIRE: 30
+      FRONTEND_URL: http://localhost:3000
+    depends_on:
+      - mongodb
+    volumes:
+      - ./backend/uploads:/app/uploads
+    networks:
+      - ecoconnect-network
+
+  # Frontend
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: ecoconnect-frontend
+    restart: unless-stopped
+    ports:
+      - "3000:80"
+    environment:
+      VITE_API_URL: http://localhost:5000/api
+    depends_on:
+      - backend
+    networks:
+      - ecoconnect-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  ecoconnect-network:
+    driver: bridge

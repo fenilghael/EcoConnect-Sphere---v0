@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Logout - EcoConnect Sphere</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f9ff;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-section {
+            margin: 20px 0;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .success { border-color: #10b981; background-color: #ecfdf5; }
+        .error { border-color: #ef4444; background-color: #fef2f2; }
+        button {
+            background: #059669;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover { background: #047857; }
+        button:disabled { background: #9ca3af; cursor: not-allowed; }
+        .result {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            font-family: monospace;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Logout Functionality Test</h1>
+        <p>This page helps you test the logout functionality of EcoConnect Sphere.</p>
+
+        <div class="test-section">
+            <h3>1. Test Backend Logout Endpoint</h3>
+            <button onclick="testLogoutEndpoint()">Test /api/auth/logout</button>
+            <div id="logout-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>2. Test Admin Account</h3>
+            <p><strong>Admin Credentials:</strong></p>
+            <ul>
+                <li>Email: admin@ecoconnect.com</li>
+                <li>Password: admin123</li>
+            </ul>
+            <button onclick="testAdminLogin()">Test Admin Login</button>
+            <div id="admin-result" class="result"></div>
+        </div>
+
+        <div class="test-section">
+            <h3>3. Manual Testing Steps</h3>
+            <ol>
+                <li>Go to <a href="http://localhost:3000" target="_blank">http://localhost:3000</a></li>
+                <li>Click "Login / Register" button</li>
+                <li>Login with admin credentials above</li>
+                <li>Look for "Welcome, System Administrator" in top-right</li>
+                <li>Click the "Logout" button (should show "Logging out..." briefly)</li>
+                <li>Verify you're logged out (button should change back to "Login / Register")</li>
+            </ol>
+        </div>
+
+        <div class="test-section">
+            <h3>4. Troubleshooting</h3>
+            <p>If logout doesn't work:</p>
+            <ul>
+                <li>Check browser console for errors (F12)</li>
+                <li>Make sure backend is running on port 5000</li>
+                <li>Check if token is cleared from localStorage</li>
+                <li>Try hard refresh (Ctrl+Shift+R)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        async function testLogoutEndpoint() {
+            const resultDiv = document.getElementById('logout-result');
+            resultDiv.innerHTML = 'Testing...';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/logout', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (response.status === 401 || response.status === 403) {
+                    resultDiv.innerHTML = `✅ Expected result: ${data.message} (Authentication required)`;
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.innerHTML = `✅ Success: ${JSON.stringify(data, null, 2)}`;
+                    resultDiv.className = 'result success';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+
+        async function testAdminLogin() {
+            const resultDiv = document.getElementById('admin-result');
+            resultDiv.innerHTML = 'Testing admin login...';
+            
+            try {
+                const response = await fetch('http://localhost:5000/api/auth/login', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        email: 'admin@ecoconnect.com',
+                        password: 'admin123'
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.success) {
+                    resultDiv.innerHTML = `✅ Admin login successful! User: ${data.user.name} (${data.user.role})`;
+                    resultDiv.className = 'result success';
+                } else {
+                    resultDiv.innerHTML = `❌ Login failed: ${data.message}`;
+                    resultDiv.className = 'result error';
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `❌ Error: ${error.message}`;
+                resultDiv.className = 'result error';
+            }
+        }
+    </script>
+</body>
+</html>
